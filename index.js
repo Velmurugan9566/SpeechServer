@@ -78,7 +78,28 @@ app.get('/getSubcategories',(req, res) => {
     .then(re=>res.json(re))
     .catch(err=>res.json(err))
 });
-
+app.get('/categorieswithcount', async (req, res) => {
+  try {
+    const categories = await Product.aggregate([
+      {
+        $group: {
+          _id: '$category', 
+          productCount: { $sum: 1 }, // Count the number of products in each category
+        }
+      },
+      {
+        $project: {
+          category: '$_id',
+          productCount: 1,
+          _id: 0 // Exclude the _id field from the output
+        }
+      }
+    ]);
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 
 app.get('/products/:category', async (req, res) => {
