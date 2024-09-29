@@ -5,10 +5,16 @@ const app = express();
 const Product = require('./models/Users');
 const Adminlog= require('./models/Admin');
 const Catelist = require('./models/Category');
-const Supplier = require('./models/Supplier')
+const Supplier = require('./models/Supplier');
+const User = require('./models/Customer');
+const cartModel = require('./models/Cart');
 const { updateProductById } = require('./Controllers/ProductUpdate');
 const { renameCategory } = require('./Controllers/CategoryUpdate');
-const {BulkInsert} = require('./Controllers/BulkInsert')
+const {BulkInsert} = require('./Controllers/BulkInsert');
+const {UserRegister} = require('./Controllers/UserRegister');
+const {UserLogin} = require('./Controllers/UserLogin');
+const {UpdateCart} =require('./Controllers/UpdateCart');
+const {PlaceOrder} = require('./Controllers/PlaceOrder');
 app.use(cors());
 app.use(express.json());
 mongoose.connect("mongodb://localhost:27017/grocery",{  
@@ -45,7 +51,7 @@ app.get('/subcategories/:category', async (req, res) => {
 });
 app.post('/Addcate',(req, res) => {
   const {cate,id} =req.body;
-  console.log(cate);
+  //console.log(cate);
   Catelist.findOne({catename:cate})
   .then(re =>{
       if (re){
@@ -62,7 +68,7 @@ app.post('/Addcate',(req, res) => {
 });
 app.post('/Addsupp',(req, res) => {
   const {suppname,suppid} =req.body;
-  console.log(suppname);
+  //console.log(suppname);
   Supplier.findOne({suppid:suppid})
   .then(re =>{
       if (re){
@@ -80,7 +86,7 @@ app.post('/Addsupp',(req, res) => {
 
 app.get('/getProduct/:id',(req, res) => {
     const { id } = req.params;
-    console.log(id)
+    //console.log(id)
     Product.findById(id)
     .then(re=>res.json(re))
     .catch(err=>res.json(err))
@@ -157,6 +163,16 @@ app.get('/products/:Subcategory', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+app.get('/AdminProductsView/:category', async (req, res) => {
+    const { category } = req.params;
+    try {
+        const products = await Product.find({ category });
+        res.json(products);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 app.get("/products", async (req, res) => {
     try {
@@ -168,8 +184,8 @@ app.get("/products", async (req, res) => {
   });
   app.get("/product/:name", async (req, res) => {
     try {
-      
-      const product = await Product.findOne({ _id: req.params.name });
+      console.log( req.params.name)
+      const product = await Product.findOne({_id: req.params.name });
       if (!product) return res.status(404).json({ message: "Product not found" });
       res.json(product);
     } catch (error) {
@@ -211,6 +227,73 @@ app.get("/products", async (req, res) => {
       .catch(err => res.json({status:3,msg:err}))
   })
   app.post("/AddBulkPro",BulkInsert)
+  app.post("/register",UserRegister)
+  app.post("/login",UserLogin);
+  app.get("/getuser",(req,res)=>{
+    const {name} = req.query;
+    User.findOne({ email:name })
+    .then(user=>{
+      //console.log(user);
+      if(user){
+        res.json({status:1,detail:user})
+      }else{
+        res.json({status:2})
+      }
+    })
+    .catch(err=>res.json(err))
+  })
+  app.put('/update-user/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, email, age, gender, phone } = req.body;
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        id,
+        { name, email, age, gender, phone },
+        { new: true } // Return the updated document
+      );
+  
+      if (updatedUser) {
+        return res.status(200).json({ success: true, user: updatedUser });
+      } else {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+  
+  app.get('/fetchCart/:email', async (req, res) => {
+    const { email } = req.params;
+    try {
+        const cartItems = await cartModel.find({ email });
+        if (cartItems) {
+            //console.log(cartItems);
+            res.status(200).json(cartItems);
+        } else {
+          console.log("no items");
+            res.status(404).json({ message: "Cart is empty" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching cart", error });
+    }
+});
+app.put('/updateCart',UpdateCart);
+app.delete('/deleteCart', (req, res) => {
+  const { email, n } = req.query;
+  cartModel.deleteOne({ email: email, proname: n })
+    .then(() => {
+      //console.log("Product deleted.");
+      res.status(200).send({ message: 'Product deleted successfully' });
+    })
+    .catch((error) => {
+      console.error("Product not deleted", error);
+      res.status(500).send({ message: 'Error deleting product' });
+    });
+});
+
+app.post('/placeOrder',PlaceOrder);
+
 app.listen(3001, () => {
     console.log('Server is running on port 3001');
 });
