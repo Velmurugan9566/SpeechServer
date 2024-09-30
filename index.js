@@ -8,6 +8,8 @@ const Catelist = require('./models/Category');
 const Supplier = require('./models/Supplier');
 const User = require('./models/Customer');
 const cartModel = require('./models/Cart');
+const TransactionModel = require('./models/OrderItem');
+const OrderModel = require('./models/Order');
 const { updateProductById } = require('./Controllers/ProductUpdate');
 const { renameCategory } = require('./Controllers/CategoryUpdate');
 const {BulkInsert} = require('./Controllers/BulkInsert');
@@ -291,8 +293,41 @@ app.delete('/deleteCart', (req, res) => {
       res.status(500).send({ message: 'Error deleting product' });
     });
 });
-
 app.post('/placeOrder',PlaceOrder);
+// Fetch low quantity products
+app.get('/products_low_quantity', async (req, res) => {
+  try {
+    const lowQuantityProducts = await Product.find({ quantity: { $lt: 5 } });
+    res.json(lowQuantityProducts);
+  } catch (err) {
+    res.status(500).send('Error retrieving low quantity products');
+  }
+});
+
+// Fetch today's transactions
+app.get('/transactions/today', async (req, res) => {
+  try {
+    // Get the start and end of today
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Query the database for orders within today's date range
+    const todayTransactions = await OrderModel.find({
+      dateTime: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      },
+      paymentStatus: 'Completed' // Optional filter for only completed transactions
+    }).populate('userId'); // Optional if you want to include user details
+
+    res.status(200).json(todayTransactions);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching today\'s transactions', error });
+  }
+});
+
 
 app.listen(3001, () => {
     console.log('Server is running on port 3001');
