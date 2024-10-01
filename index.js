@@ -327,6 +327,96 @@ app.get('/transactions/today', async (req, res) => {
     res.status(500).json({ message: 'Error fetching today\'s transactions', error });
   }
 });
+app.get('/FetchOrders', async (req, res) => {
+  try {
+      const orders = await OrderModel.find();
+      const minDateOrder = await OrderModel.findOne().sort({ dateTime: 1 });
+      const maxDateOrder = await OrderModel.findOne().sort({ dateTime: -1 });
+
+      const minDate = minDateOrder ? minDateOrder.dateTime : null;
+      const maxDate = maxDateOrder ? maxDateOrder.dateTime : null;
+
+      res.status(200).json({ orders, minDate, maxDate });
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch orders and date range' });
+  }
+});
+app.get('/FilterOrder', async (req, res) => {
+  const { startDate, endDate } = req.query;
+  try {
+      const orders = await OrderModel.find({
+          dateTime: {
+              $gte: new Date(startDate),
+              $lte: new Date(endDate)
+          }
+      });
+      res.status(200).json(orders);
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to filter orders' });
+  }
+});
+app.get('/RevenueOrder', async (req, res) => {
+  const { month } = req.query;
+   console.log(req.body);
+  try {
+      const startOfMonth = new Date(new Date().getFullYear(), month - 1, 1);
+      const endOfMonth = new Date(new Date().getFullYear(), month, 0);
+      const orders = await OrderModel.aggregate([
+          {
+              $match: {
+                  dateTime: {
+                      $gte: startOfMonth,
+                      $lt: endOfMonth
+                  }
+              }
+          },
+          {
+              $group: {
+                  _id: { $dayOfMonth: '$dateTime' },
+                  totalRevenue: { $sum: '$totalAmount' }
+              }
+          },
+          {
+              $sort: { _id: 1 }
+          }
+      ]);
+
+      const formattedRevenue = orders.map(order => ({
+          date: order._id,
+          totalRevenue: order.totalRevenue
+      }));
+      res.status(200).json(formattedRevenue);
+  } catch (error) {
+      res.status(200).json({ error: 'Failed to fetch monthly revenue' });
+  }
+});
+app.get('/FrequentItems', async (req, res) => {
+  try {
+      const frequentItems = await TransactionModel.aggregate([
+          {
+              $group: {
+                  _id: '$proname',
+                  quantity: { $sum: '$quantity' }
+              }
+          },
+          {
+              $sort: { quantity: -1 }
+          },
+          {
+              $limit: 10  // Adjust the limit as necessary
+          }
+      ]);
+
+      const formattedItems = frequentItems.map(item => ({
+          proname: item._id,
+          quantity: item.quantity
+      }));
+
+      res.status(200).json(formattedItems);
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch frequent items' });
+  }
+});
 
 
 app.listen(3001, () => {
