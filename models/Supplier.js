@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 
 const SuppSchema = new mongoose.Schema({
-  
+  suppEmail:String,
+  suppPhone:Number,
   suppname: String,
   suppid: String,
   
