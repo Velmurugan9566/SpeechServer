@@ -417,6 +417,29 @@ app.get('/FrequentItems', async (req, res) => {
       res.status(500).json({ error: 'Failed to fetch frequent items' });
   }
 });
+app.get('/customersWithOrder', async (req, res) => {
+  try {
+    // Fetch all customers
+    const customers = await User.find();
+
+    if (customers.length === 0) {
+      return res.status(404).json({ message: "No customers found" });
+    }
+
+    // Fetch orders for each customer and combine the data
+    const customerDetails = await Promise.all(customers.map(async (customer) => {
+      const orders = await OrderModel.find({ userId: customer.email });
+      return {
+        user: customer,
+        orders: orders
+      };
+    }));
+
+    res.status(200).json(customerDetails);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching customer details", error });
+  }
+});
 
 
 app.listen(3001, () => {

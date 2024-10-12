@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
-const ProductModel = require('../models/Users'); // Your product model
-const SuppModel = require('../models/Supplier'); // Your supplier model
+const ProductModel = require('../models/Users'); 
+const SuppModel = require('../models/Supplier'); 
 
 // Function to send the email
 const sendLowQuantityEmail = async () => {

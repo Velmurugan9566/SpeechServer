@@ -47,7 +47,7 @@ const PlaceOrder= async (req, res) => {
     //   .catch(err=>console.log("subtract product",err))
     // })
     
-    res.status(200).json({ message: 'Order placed successfully' });
+    res.status(200).json({ message: 'Order placed successfully' ,orderId:savedOrder._id});
   } catch (error) {
     console.error('Error placing order', error);
     res.status(500).json({ message: 'Error placing order' });

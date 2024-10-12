@@ -53,10 +53,10 @@ const sendRegistrationEmail = (email, name) => {
   const mailOptions = {
     from: 'fundamentalbhaikl@gmail.com',
     to: email,
-    subject: 'Welcome to Our Service',
-    html: `<p>Hello <strong>${name}</strong>,</p>
+    subject: 'Welcome to My Shop',
+    html: `<html><p style="color:blue;">Hello <strong>${name}</strong>,</p>
            <p>Thank you for registering on our platform! We're excited to have you with us.</p>
-           <p>Best regards,<br>The Team</p>`
+           <p>Best regards,<br>M.Velmurugan</p></html>`
   };
   
 
