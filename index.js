@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 const app = express();
 const Product = require('./models/Users');
 const Adminlog= require('./models/Admin');
@@ -19,7 +20,7 @@ const {UpdateCart} =require('./Controllers/UpdateCart');
 const {PlaceOrder} = require('./Controllers/PlaceOrder');
 app.use(cors());
 app.use(express.json());
-mongoose.connect("mongodb://localhost:27017/grocery",{  
+mongoose.connect(process.env.MONGO_URI,{  
 //mongoose.connect('mongodb+srv://velmca24:vel9566@cluster0.i4qp0rb.mongodb.net/grocery?retryWrites=true&w=majority&appName=Cluster0', {
 }).then(() => {
     console.log('Connected to MongoDB');
@@ -442,6 +443,6 @@ app.get('/customersWithOrder', async (req, res) => {
 });
 
 
-app.listen(3001, () => {
-    console.log('Server is running on port 3001');
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on port ${process.env.PORT}`);
 });

@@ -30,10 +30,10 @@ const sendLowQuantityEmail = async () => {
       }
     }));
 
-    console.log(productsWithSupplier);
+    //console.log(productsWithSupplier);
 
   if (productsWithSupplier.length === 0) return;
-  console.log(productsWithSupplier)
+  //console.log(productsWithSupplier)
   // Prepare the table rows with product and supplier details
   const rows = productsWithSupplier.map(product => {
     return `
@@ -54,6 +54,7 @@ const sendLowQuantityEmail = async () => {
           /* Basic styles */
           body { font-family: Arial, sans-serif; }
           h2 { color: red; }
+          
           table {
             width: 100%;
             border-collapse: collapse;
@@ -76,6 +77,7 @@ const sendLowQuantityEmail = async () => {
       </head>
       <body>
         <h2>Low Quantity Products Report - ${new Date().toLocaleString()}</h2>
+        <h3>Quantities are below 10</h3>
         <table>
           <thead>
             <tr>
@@ -97,15 +99,15 @@ const sendLowQuantityEmail = async () => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'fundamentalbhaikl@gmail.com', 
-      pass: 'fkitdqsmwtfqlyog', 
+      user: 'shoppingportalmsu@gmail.com', 
+      pass: 'xbnyiodqwxcfuhtq', 
     }
   });
 
   // Send the email
   const mailOptions = {
-    from: 'fundamentalbhaikl@gmail.com',
-    to: 'fundamentalbhaikl@gmail.com', 
+    from: 'shoppingportalmsu@gmail.com',
+    to: 'shoppingportalmsu@gmail.com', 
     subject: 'Low Quantity Products Report',
     html: emailHTML,
   };

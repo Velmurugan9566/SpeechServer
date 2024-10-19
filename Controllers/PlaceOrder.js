@@ -4,23 +4,23 @@ const OrderItemModel = require('../models/OrderItem');  // Your OrderItem schema
 const CartModel = require('../models/Cart');
 const ProductModel = require('../models/Users');
 const SendMailQuantity = require('../Controllers/SendMailQuantity');
+const SendMailOrder = require('../Controllers/sendMailOrderPlaced')
 const PlaceOrder= async (req, res) => {
   const { user, cart, paymentMethod, orderMethod, grandTotal } = req.body;
   //console.log(user,cart,paymentMethod,orderMethod,grandTotal)
   try {
-    // 1. Create a new order
+ 
     const newOrder = new OrderModel({
       userId:user,
       paymentMode:paymentMethod,
-      paymentStatus: 'Completed',  // Default status could be pending initially
+      paymentStatus: 'Completed', 
       totalAmount: grandTotal,
       orderMode:orderMethod
     });
 
-    // Save the order to get the order ID
     const savedOrder = await newOrder.save();
 
-    // 2. Insert each cart item into the OrderItem collection
+
     const orderItemsPromises = cart.map(item => {
       const orderItem = new OrderItemModel({
         orderId: savedOrder._id,
@@ -29,18 +29,19 @@ const PlaceOrder= async (req, res) => {
         quantity: item.quantity,
         total: item.totalPrice
       });
-      return orderItem.save();  // Save each order item
+      return orderItem.save();  
     });
 
-    // Wait for all order items to be inserted
+
     await Promise.all(orderItemsPromises);
   
-    // 3. Send success response
+
     console.log("inserted..")
+    SendMailOrder.sendOrderConfirmationEmail(user, savedOrder._id, orderMethod, paymentMethod, grandTotal, cart);
     SendMailQuantity.sendLowQuantityEmail()
-    // CartModel.deleteMany({email:user})
-    // .then(res)
-    // .catch(err=> console.log("error deletecart",err))
+    CartModel.deleteMany({email:user})
+    .then(res)
+    .catch(err=> console.log("error deletecart",err))
     // cart.map(item=>{
     //   ProductModel.updateOne({proname:item.proname},{$inc:{quantity:-item.quantity}})
     //   .then(res)
