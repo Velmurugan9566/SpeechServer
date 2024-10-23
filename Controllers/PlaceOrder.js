@@ -42,11 +42,11 @@ const PlaceOrder= async (req, res) => {
     CartModel.deleteMany({email:user})
     .then(res)
     .catch(err=> console.log("error deletecart",err))
-    // cart.map(item=>{
-    //   ProductModel.updateOne({proname:item.proname},{$inc:{quantity:-item.quantity}})
-    //   .then(res)
-    //   .catch(err=>console.log("subtract product",err))
-    // })
+    cart.map(item=>{
+      ProductModel.updateOne({proname:item.proname},{$inc:{quantity:-item.quantity}})
+      .then(res)
+      .catch(err=>console.log("subtract product",err))
+    })
     
     res.status(200).json({ message: 'Order placed successfully' ,orderId:savedOrder._id});
   } catch (error) {

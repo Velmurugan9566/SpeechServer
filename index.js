@@ -18,6 +18,7 @@ const {UserRegister} = require('./Controllers/UserRegister');
 const {UserLogin} = require('./Controllers/UserLogin');
 const {UpdateCart} =require('./Controllers/UpdateCart');
 const {PlaceOrder} = require('./Controllers/PlaceOrder');
+const {ContactMsgForm} =require('./Controllers/ContactMsgForm');
 app.use(cors());
 app.use(express.json());
 mongoose.connect(process.env.MONGO_URI,{  
@@ -298,7 +299,7 @@ app.post('/placeOrder',PlaceOrder);
 // Fetch low quantity products
 app.get('/products_low_quantity', async (req, res) => {
   try {
-    const lowQuantityProducts = await Product.find({ quantity: { $lt: 5 } });
+    const lowQuantityProducts = await Product.find({ quantity: { $lt: 10 } });
     res.json(lowQuantityProducts);
   } catch (err) {
     res.status(500).send('Error retrieving low quantity products');
@@ -441,7 +442,7 @@ app.get('/customersWithOrder', async (req, res) => {
     res.status(500).json({ message: "Error fetching customer details", error });
   }
 });
-
+app.post('/ContactMsg',ContactMsgForm)
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);

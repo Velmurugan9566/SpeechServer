@@ -5,6 +5,7 @@ const Product = require('../models/Users');
 
 // Rename category and update related products
 const renameCategory = async (req, res) => {
+  console.log(req.body)
   const { oldName, newName } = req.body;
 
   try {

@@ -50,7 +50,7 @@ const sendOrderConfirmationEmail = async (userEmail, orderId, orderMethod, payme
 
   // Send the email
   const mailOptions = {
-    from: 'fundamentalbhaikl@gmail.com',
+    from: 'shoppingportalmsu@gmail.com',
     to: userEmail,
     subject: 'Order Confirmation',
     html: emailHTML,
